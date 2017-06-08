@@ -1,0 +1,17 @@
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "8080:3000"
+    links:
+      - hazelcast
+    environment:
+      HZ_HOST: "hazelcast"
+      HZ_PORT: 5701
+
+  hazelcast:
+    image: hazelcast/hazelcast
+
+  hazelcast_backup:
+    image: hazelcast/hazelcast
