@@ -13,5 +13,5 @@ services:
   hazelcast:
     image: hazelcast/hazelcast
 
-  hazelcast_backup:
-    image: hazelcast/hazelcast
+  # hazelcast_backup:
+  #   image: hazelcast/hazelcast
