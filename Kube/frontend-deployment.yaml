@@ -1,16 +1,17 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
 metadata:
-  name: node-hz.iilunin.com
+  name: nodejs-deployment
+
 spec:
-  replicas: 2
-  selector:
-    service: fe
+  replicas: 3
+  # selector:
+  #   service: fe
 
   template:
 
     metadata:
-      name: node-hz.iilunin.com
+      name: nodejs.iilunin.com
       labels:
         service: fe
     spec:
@@ -24,7 +25,7 @@ spec:
         - name: HZ_PORT
           value: "5701"
         - name: HZ_HOST
-          value: hz
+          value: hazelcast-service
         resources:
           requests:
             memory: "64Mi"
@@ -36,7 +37,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-service
+  name: nodejs-service
 spec:
   ports:
   - port: 80

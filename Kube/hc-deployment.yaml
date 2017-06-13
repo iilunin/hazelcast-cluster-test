@@ -1,0 +1,48 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hazelcast-deployment
+
+spec:
+  replicas: 6
+
+  template:
+
+    metadata:
+      name: hazelcast
+      labels:
+        name: hazelcast
+    spec:
+      containers:
+      - name: hazelcast
+        image: hazelcast/hazelcast:latest
+        ports:
+        - name: hc
+          containerPort: 5701
+        # env:
+        # - name: HZ_PORT
+        #   value: "5701"
+        # - name: HZ_HOST
+        #   value: hz
+        resources:
+          requests:
+            memory: "300Mi"
+            cpu: "100m"
+          limits:
+            memory: "500Mi"
+            # cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hazelcast-service
+spec:
+  ports:
+  - port: 5701
+    # targetPort: hazelcast
+    # protocol: TCP
+  selector:
+    name: hazelcast
+  # type: NodePort
+---
+...
