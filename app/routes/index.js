@@ -4,7 +4,7 @@ var HazelcastClient = require('hazelcast-client').Client;
 var Config = require('hazelcast-client').Config;
 
 var config = new Config.ClientConfig();
-config.networkConfig.addresses = [{host: process.env.HZ_HOST | "localhost", port: process.env.HZ_PORT | 5701}];
+config.networkConfig.addresses = [{host: process.env.HZ_HOST || "localhost", port: process.env.HZ_PORT || 5701}];
 
 const LIST_NAME = "randomlist"
 
