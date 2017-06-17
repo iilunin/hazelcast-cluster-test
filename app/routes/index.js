@@ -4,101 +4,57 @@ var HazelcastClient = require('hazelcast-client').Client;
 var Config = require('hazelcast-client').Config;
 
 var config = new Config.ClientConfig();
-config.networkConfig.addresses = [{host: process.env.HZ_HOST, port: process.env.HZ_PORT}];
+config.networkConfig.addresses = [{host: process.env.HZ_HOST | "localhost", port: process.env.HZ_PORT | 5701}];
 
-var LIST_NAME = "randomlist"
+const LIST_NAME = "randomlist"
 
 function getList(){
   return HazelcastClient
       .newHazelcastClient(config)
-      .then(function (hazelcastClient) {
-          return hazelcastClient.getList(LIST_NAME);
+      .then(hazelcastClient => hazelcastClient.getList(LIST_NAME))
+      .then(list => {
+        if (list == null)
+          return null;
+        return list;
       })
-      .catch(function(error){
-          console.log(error)
-          console.log(list)
+      .catch(error => {
+          console.log(error);
+          return null;
       });
-}
+};
+
+function renderList(res, list){
+  res.render('index', {
+    size: list == null? 0 : list.length,
+    cache: list == null? 'empty' : list.join('<br>')
+  });
+};
+
+function renderError(res, error){
+  res.render('index', { size: 0, cache: error });
+};
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   getList()
-  .then(function(list){
-    list.size().then(function(size){
-      if (size > 0){
-          list.toArray().then(function(vals){
-            res.render('index', { size: size, cache: vals.join('<br>') });
-          })
-      }else{
-          res.render('index', { size: 0, cache: 'empty' });
-      }
-    }).catch(function(error){
-      res.render('index', { size: 0, cache: error });
-    });
-  }).catch(function(error){
-    res.render('index', { size: 0, cache: error });
-  });
-
+  .then(list => list.toArray())
+  .then(list => renderList(res, list))
+  .catch(error => renderError(res, error));
 });
-
-// /* GET home page. */
-// router.get('/', function(req, res, next) {
-//   list.size().then(function(size){
-//     if (size > 0){
-//         list.toArray().then(function(vals){
-//           res.render('index', { size: size, cache: vals.join('<br>') });
-//         })
-//     }else{
-//         res.render('index', { size: 0, cache: 'empty' });
-//     }
-//   }).catch(function(error){
-//     res.render('index', { size: 0, cache: error });
-//   });
-// });
 
 /* GET home page. */
 router.post('/', function(req, res, next) {
   getList()
-  .then(function(list){
-    list.add(Math.random()).then(function(v){
-      // console.log(v);
-        // res.render('index', { size: 0, cache: v })
-    }).catch(function(e){
-      console.log(e);
-    }).then(list.size().then(function(size){
-      if (size > 0){
-          list.toArray().then(function(vals){
-            res.render('index', { size: size, cache: vals.join('<br>') });
-          })
-      }else{
-        res.render('index', { size: 0, cache: 'empty' });
-      }
-    })
-    );
-  })
-  .catch(function(error){
-    res.render('index', { size: 0, cache: error });
-  });
-});
+  .then(list => {
+    if(list){
+      list.add(Math.random())
+      return list.toArray()
+    }
 
-// /* GET home page. */
-// router.post('/', function(req, res, next) {
-//
-//   list.add(Math.random()).then(function(v){
-//     console.log(v);
-//       // res.render('index', { size: 0, cache: v })
-//   }).catch(function(e){
-//     console.log(e);
-//   }).then(list.size().then(function(size){
-//     if (size > 0){
-//         list.toArray().then(function(vals){
-//           res.render('index', { size: size, cache: vals.join('<br>') });
-//         })
-//     }else{
-//       res.render('index', { size: 0, cache: 'empty' });
-//     }
-//   })
-//   );
-// });
+    return null;
+  })
+  .then(list => renderList(res, list))
+  .catch(error => renderError(res, error));
+});
 
 module.exports = router;
